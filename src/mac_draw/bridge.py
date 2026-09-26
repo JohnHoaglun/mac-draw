@@ -29,7 +29,7 @@ class BridgeClient:
         self.config = config
 
     def generate(self, *, prompt: str, size: str, seed: int | None, session_id: str | None) -> ImageResult:
-        payload: dict[str, Any] = {"prompt": prompt, "size": size}
+        payload: dict[str, Any] = {"prompt": prompt, "size": size, "response_format": "b64_json", "output_format": "png"}
         if seed is not None:
             payload["seed"] = seed
         if session_id:
@@ -88,4 +88,5 @@ class BridgeClient:
         metadata = response_data.get("metadata", {})
         if not isinstance(metadata, dict):
             metadata = {"bridge_metadata": metadata}
+        metadata.update({key: value for key, value in response_data.items() if key not in {"data", "metadata"}})
         return ImageResult(image_bytes=image_bytes, metadata=metadata)
