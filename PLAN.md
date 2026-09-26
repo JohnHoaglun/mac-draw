@@ -14,7 +14,7 @@ Deploy and verify `google/gemma-4-12B-it-qat-w4a16-ct` on the DGX Spark without 
 ## Verified operating boundary
 - All retained Spark containers use `restart: unless-stopped` and JSON log rotation of 100 MB × 7.
 - Legacy LiteLLM/tools/CLI/search services and the retired Qwen MoE/dense containers are removed.
-- After John’s explicit post-deployment decision, a **manual-only** provider was added to this workstation as `gx10-gemma12/gemma4-12b-qat`. It does not alter `build`, `research`, fallbacks, subagents, or E2B routing.
+- After John’s explicit post-deployment decision, a **manual-only** provider and named `gemma4-12b-qat` agent were added to this workstation. It does not alter `build`, `research`, fallbacks, subagents, or E2B routing.
 - No OpenCode agent route, `AGENTS.md`, or other-machine agent configuration was edited.
 
 ## Next deliberate phase — review, not implementation
