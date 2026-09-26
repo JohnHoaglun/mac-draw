@@ -10,7 +10,7 @@
 - [x] Update the vault note and the DGX-Spark-Config repository.
 - [x] Add `gx10-gemma12/gemma4-12b-qat` and its named `gemma4-12b-qat` manual agent on Mac and Windows; preserve active routes.
 - [x] Refresh Pi OpenCode JSONC and OMP model registry: remove retired Spark Qwen endpoints and add manual Gemma 12B; Pi can reach the service.
-- [ ] Restore or locate Pi `opencode` and `omp` executables, then run named-agent/model-registry smoke tests.
+- [x] Reinstall Pi OpenCode (`1.18.32`) and OMP (`18.3.2`) from official installers; smoke-test the named OpenCode agent and OMP Gemma registry.
 - [x] Windows Codex remains independently cloud-configured.
 
 ## Pending review with John
