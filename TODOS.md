@@ -9,7 +9,9 @@
 - [x] Remove legacy routers/search/Qwen services and unused data; document final disk state.
 - [x] Update the vault note and the DGX-Spark-Config repository.
 - [x] Add `gx10-gemma12/gemma4-12b-qat` and its named `gemma4-12b-qat` manual agent on Mac and Windows; preserve active routes.
-- [x] Inventory Pi and Windows harnesses: Pi has no installed harness/config to update; Windows Codex remains independently cloud-configured.
+- [x] Refresh Pi OpenCode JSONC and OMP model registry: remove retired Spark Qwen endpoints and add manual Gemma 12B; Pi can reach the service.
+- [ ] Restore or locate Pi `opencode` and `omp` executables, then run named-agent/model-registry smoke tests.
+- [x] Windows Codex remains independently cloud-configured.
 
 ## Pending review with John
 - [ ] Decide the caller skill/API design for `draw_picture` and, later, `edit_picture`.
