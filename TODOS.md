@@ -8,7 +8,8 @@
 - [x] Recreate retained services with `restart: unless-stopped` and 100 MB × 7 log rotation.
 - [x] Remove legacy routers/search/Qwen services and unused data; document final disk state.
 - [x] Update the vault note and the DGX-Spark-Config repository.
-- [x] Add `gx10-gemma12/gemma4-12b-qat` and its named `gemma4-12b-qat` manual agent; preserve active routes.
+- [x] Add `gx10-gemma12/gemma4-12b-qat` and its named `gemma4-12b-qat` manual agent on Mac and Windows; preserve active routes.
+- [x] Inventory Pi and Windows harnesses: Pi has no installed harness/config to update; Windows Codex remains independently cloud-configured.
 
 ## Pending review with John
 - [ ] Decide the caller skill/API design for `draw_picture` and, later, `edit_picture`.
