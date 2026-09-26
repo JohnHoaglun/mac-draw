@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mac-draw"
-version = "0.1.0"
+version = "0.1.1"
 description = "Mac-local client for a LAN-hosted image-generation bridge"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -12,6 +12,7 @@ license = {text = "MIT"}
 authors = [{name = "John Hoaglun"}]
 
 [project.scripts]
+mac-draw = "mac_draw.cli:main"
 picture = "mac_draw.cli:main"
 
 [tool.setuptools.packages.find]

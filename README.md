@@ -1,39 +1,36 @@
 # mac-draw
 
-`picture` is a Mac-local command-line client for a LAN-hosted image-generation bridge. It does not host a model: it submits generation/edit requests, receives the result, and saves images plus reproducibility metadata into an Obsidian vault.
+`mac-draw` is a human-facing Mac command for generating images through the authenticated Qwen-Image bridge on the DGX Spark. It saves the PNG and reproducibility JSON locally in the Obsidian vault.
 
-## Planned flow
-
-```text
-picture on macOS → authenticated LAN image bridge → Qwen-Image on DGX Spark
-                         ↓
-                PNG + metadata returned
-                         ↓
-              local Obsidian vault / Attachments/gen
-```
-
-## Initial commands
+## Draw an image
 
 ```bash
-picture draw "A dragon flying over a field" --size 1024x1024
-picture edit Attachments/gen/dragon.png "Make it red at sunset"
-picture config show
+mac-draw "draw a picture of a red dragon over a sunset field"
 ```
 
-The bridge contract and Spark deployment will be added separately. The client intentionally keeps the vault write local and never stores credentials in the vault.
+That is the normal workflow. The command reads the bridge token automatically from the macOS Keychain service `mac-draw-image-bridge`; no exported token or developer-path command is needed.
+
+Optional controls remain available:
+
+```bash
+mac-draw "a red dragon over a sunset field" --size 1024x1024 --session-id dragon-01
+mac-draw config show
+```
+
+Generated PNGs and JSON sidecars are written to `Attachments/gen/` in the configured local vault. The current bridge is `http://192.168.4.52:8092`; raw Qwen Image is never exposed to the LAN.
 
 ## Configuration
 
-Print a starting configuration:
+The local, non-secret file is `~/.config/picture/config.toml`. Print a template with:
 
 ```bash
-picture config sample
+mac-draw config sample
 ```
 
-Save it as `~/.config/picture/config.toml`, set `PICTURE_API_KEY` in your shell or Keychain-backed launcher, and point `vault.path` at the local Obsidian vault. The bridge contract is JSON over HTTPS:
+The default Keychain service is `mac-draw-image-bridge`. `PICTURE_API_KEY` remains an optional temporary override for automation; it is not required for ordinary interactive use.
 
-- `POST /v1/images/generations` accepts `prompt`, `size`, optional `seed`, and optional `session_id`.
-- `POST /v1/images/edits` accepts the same edit prompt plus `image_b64` and `image_name`.
-- Both return OpenAI-style `data[0].b64_json` and optional `metadata`.
+## Current boundary
 
-Successful calls write a `.png` plus a JSON reproducibility sidecar to `Attachments/gen/` by default.
+- `mac-draw` / `picture draw` creates a new image and is live.
+- `picture edit` is intentionally unavailable until the bridge translates the client’s request to Qwen’s required multipart edit API.
+- Tool adapters such as `draw_picture` for coding/chat harnesses are future integration work; they should call this same bridge contract rather than duplicate image code.

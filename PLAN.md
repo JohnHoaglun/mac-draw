@@ -10,6 +10,7 @@ Deploy and verify `google/gemma-4-12B-it-qat-w4a16-ct` on the DGX Spark without 
 - [x] Kept the E2B API/port stable; after its independent 16 GiB-cap tune, `/v1/models` is healthy as `gemma4-e2b` on LAN `:8007`.
 - [x] Kept Qwen-Image-2.1 and its authenticated bridge live and private/raw-endpoint constrained as designed.
 - [x] Updated the local vault deployment note and `DGX-Spark-Config` remote documentation with measured live results.
+- [x] Delivered the human-facing `mac-draw "draw a picture of …"` command, automatic Keychain credential lookup, and global local launcher.
 
 ## Verified operating boundary
 - All retained Spark containers use `restart: unless-stopped` and JSON log rotation of 100 MB × 7.

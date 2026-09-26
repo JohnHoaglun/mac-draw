@@ -1,17 +1,20 @@
-"""Configuration loading for the macOS-local picture client."""
+"""Configuration and macOS Keychain access for the local picture client."""
 
 from __future__ import annotations
 
 import os
+import subprocess
+import sys
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
 DEFAULT_CONFIG_PATH = Path("~/.config/picture/config.toml").expanduser()
+DEFAULT_KEYCHAIN_SERVICE = "mac-draw-image-bridge"
 
 
 class ConfigurationError(ValueError):
-    """Raised when the client is not configured for a bridge and vault."""
+    """Raised when the bridge or local vault is not configured."""
 
 
 @dataclass(frozen=True)
@@ -39,8 +42,33 @@ def _read_toml(path: Path) -> dict:
         return tomllib.load(handle)
 
 
+def _keychain_password(service: str) -> str:
+    """Read a local macOS Keychain item without ever printing its value."""
+    if sys.platform != "darwin":
+        return ""
+    result = subprocess.run(
+        ["security", "find-generic-password", "-a", os.environ.get("USER", ""), "-s", service, "-w"],
+        capture_output=True,
+        check=False,
+        text=True,
+    )
+    return result.stdout.rstrip("\r\n") if result.returncode == 0 else ""
+
+
+def _keychain_item_exists(service: str) -> bool:
+    if sys.platform != "darwin":
+        return False
+    result = subprocess.run(
+        ["security", "find-generic-password", "-a", os.environ.get("USER", ""), "-s", service],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return result.returncode == 0
+
+
 def load_config(path: Path | None = None) -> ClientConfig:
-    """Load configuration, allowing environment variables to override TOML."""
+    """Load config; environment overrides the local Keychain, then TOML settings."""
     config_path = path or config_path_from_environment()
     data = _read_toml(config_path)
     bridge = data.get("bridge", {})
@@ -50,7 +78,8 @@ def load_config(path: Path | None = None) -> ClientConfig:
     vault_value = os.environ.get("PICTURE_VAULT_PATH", vault.get("path", ""))
     output_dir = os.environ.get("PICTURE_OUTPUT_DIR", vault.get("output_dir", "Attachments/gen"))
     key_env = bridge.get("api_key_env", "PICTURE_API_KEY")
-    api_key = os.environ.get(key_env, "")
+    keychain_service = bridge.get("keychain_service", DEFAULT_KEYCHAIN_SERVICE)
+    api_key = os.environ.get(key_env, "") or _keychain_password(keychain_service)
     timeout = int(os.environ.get("PICTURE_TIMEOUT_SECONDS", bridge.get("timeout_seconds", 180)))
 
     missing = []
@@ -59,7 +88,7 @@ def load_config(path: Path | None = None) -> ClientConfig:
     if not vault_value:
         missing.append("vault.path (or PICTURE_VAULT_PATH)")
     if not api_key:
-        missing.append(f"environment variable {key_env}")
+        missing.append(f"Keychain item {keychain_service!r} or environment variable {key_env}")
     if missing:
         raise ConfigurationError("Missing " + ", ".join(missing) + f". Configure {config_path}.")
 
@@ -83,12 +112,13 @@ def load_config(path: Path | None = None) -> ClientConfig:
 
 
 def safe_config_summary(path: Path | None = None) -> dict[str, object]:
-    """Return a non-secret summary suitable for terminal or JSON output."""
+    """Return a non-secret configuration summary suitable for terminal output."""
     config_path = path or config_path_from_environment()
     data = _read_toml(config_path)
     bridge = data.get("bridge", {})
     vault = data.get("vault", {})
     key_env = bridge.get("api_key_env", "PICTURE_API_KEY")
+    keychain_service = bridge.get("keychain_service", DEFAULT_KEYCHAIN_SERVICE)
     return {
         "config_path": str(config_path),
         "exists": config_path.exists(),
@@ -96,8 +126,22 @@ def safe_config_summary(path: Path | None = None) -> dict[str, object]:
         "vault_path": os.environ.get("PICTURE_VAULT_PATH", vault.get("path")),
         "output_dir": os.environ.get("PICTURE_OUTPUT_DIR", vault.get("output_dir", "Attachments/gen")),
         "api_key_environment_variable": key_env,
-        "api_key_present": bool(os.environ.get(key_env)),
+        "api_key_present_in_environment": bool(os.environ.get(key_env)),
+        "keychain_service": keychain_service,
+        "keychain_item_present": _keychain_item_exists(keychain_service),
     }
 
 
-SAMPLE_CONFIG = '''# Keep the API key in the macOS Keychain or environment, not in this file.\n\n[bridge]\nurl = "https://spark.local:8091"\napi_key_env = "PICTURE_API_KEY"\ntimeout_seconds = 180\n\n[vault]\npath = "/Users/johnhoaglun/Library/Mobile Documents/iCloud~md~obsidian/Documents/JH_Home_Obsidian"\noutput_dir = "Attachments/gen"\n'''
+SAMPLE_CONFIG = '''# The bridge token is read automatically from this macOS Keychain service.
+# PICTURE_API_KEY remains an optional temporary override for automation.
+
+[bridge]
+url = "http://192.168.4.52:8092"
+api_key_env = "PICTURE_API_KEY"
+keychain_service = "mac-draw-image-bridge"
+timeout_seconds = 180
+
+[vault]
+path = "/Users/johnhoaglun/Library/Mobile Documents/iCloud~md~obsidian/Documents/JH_Home_Obsidian"
+output_dir = "Attachments/gen"
+'''

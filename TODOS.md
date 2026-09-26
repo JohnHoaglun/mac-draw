@@ -12,6 +12,7 @@
 - [x] Refresh Pi OpenCode JSONC and OMP model registry: remove retired Spark Qwen endpoints and add manual Gemma 12B; Pi can reach the service.
 - [x] Reinstall Pi OpenCode (`1.18.32`) and OMP (`18.3.2`) from official installers; smoke-test the named OpenCode agent and OMP Gemma registry.
 - [x] Windows Codex remains independently cloud-configured.
+- [x] Replace developer-oriented `picture draw` workflow with global `mac-draw "draw a picture of …"`, automatic Keychain lookup, corrected client README/config sample, and end-to-end vault smoke test.
 
 ## Pending review with John
 - [ ] Decide the caller skill/API design for `draw_picture` and, later, `edit_picture`.
